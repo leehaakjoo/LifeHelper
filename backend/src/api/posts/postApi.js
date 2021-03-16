@@ -1,12 +1,45 @@
 const Post = require('../../models/post');
 const Joi = require('joi'); //객체를 검증하기 위한 라이브러리
+const mongoose = require('mongoose');
+
+const {ObjectId} = mongoose.Types;
+
+export const getPostById = async (ctx, next) => {
+    const {id} = ctx.params;
+    if(!ObjectId.isValid(id)) {
+        ctx.status = 400; //bad request
+        return;
+    }
+    try{
+        const post = await Post.findById(id);
+        if(!post){ //post가 없을 때
+            ctx.status = 404;
+            return;
+        }
+        ctx.state.post = post;
+        return next();
+    } catch(e){
+        ctx.throw(500, e);
+    }
+}
+
+export const checkOwnPost = async (ctx, next) => {
+    const {user, post} = ctx.state;
+    if(post.user._id.toString() !== user._id){
+        ctx.status = 403;
+        return;
+    }
+    return next();
+}
 
 export const write = async ctx => {
     const schema = Joi.object().keys({
         title: Joi.string().required(),
         body: Joi.string().required(),
+        comments: Joi.array()
+            .items(Joi.string()),
     });
-    const result = schema.validate(ctx.request.body);
+    const result = schema.validate(ctx.request.body); //검증
     if(result.error){
         ctx.status = 400; // Bad request
         ctx.body = result.error;
@@ -16,7 +49,10 @@ export const write = async ctx => {
     const post = new Post({
         title,
         body,
+        user: ctx.state.user,
     });
+    console.log('post', post);
+    console.log('user', ctx.state.user);
     try{
         await post.save();
         ctx.body = post;
@@ -25,15 +61,64 @@ export const write = async ctx => {
     }
 };
 
-export const list = ctx => {
-
+export const list = async ctx => {
+    const page = parseInt(ctx.query.page || '1', 10);
+    //localhost:4000/api/posts?page=1 or 2 이런식으로 페이지를 지정해서 조회
+    if(page < 1){
+        ctx.status = 400;
+        return;
+    }
+    try{
+        const posts = await Post.find()
+            .sort({_id: -1})
+            .limit(10) //10개씩 지정
+            .skip((page - 1) * 10) //1 페이지에는 10개, 2페이지에 그 다음 10개를 지정할 수 있도록 page값은 query에서 받아오도록 설정한다.
+            .exec();
+        const postCount = await Post.countDocuments().exec();
+        ctx.set('Last-Page', Math.ceil(postCount / 10)); //마지막 페이지를 알려줌. header 값에 포함됨.
+        ctx.body = posts.map(post => ({
+            ...post,
+            body:
+                post.body.length <200 ? post.body : `${post.body.slice(0,200)}...`,
+        }));
+    } catch (e){
+        ctx.throw(500, e);
+    }
 };
-export const read = ctx => {
-
+export const read = async ctx => {
+    ctx.body = ctx.state.post;
 };
-export const remove = ctx => {
-
+export const remove = async ctx => {
+    const {postId} = ctx.params;
+    try{
+        await Post.findByIdAndDelete(postId).exec();
+        ctx.status = 204; //성공했지만 응답한 데이터가 없을 때
+    }catch (e){
+        ctx.throw(500, e);
+    }
 };
-export const update = ctx => {
-
+export const update = async ctx => {
+    const {postId} = ctx.params;
+    const schema = Joi.object().keys({
+        title: Joi.string().required(),
+        body: Joi.string().required(),
+        comments: Joi.array().items(Joi.string()),
+    });
+    const result = schema.validate(ctx.request.body);
+    if(result.error){
+        ctx.status = 400;
+        ctx.body = result.error;
+        return;
+    }
+    try{
+        const post = await Post.findByIdAndUpdate(postId, ctx.request.body, {
+            new: true, //업데이트된 데이터를 반환한다.
+        }).exec();
+        if(!post){
+            ctx.status = 404;
+            return;
+        }
+    } catch (e){
+        ctx.throw(500, e);
+    }
 };
