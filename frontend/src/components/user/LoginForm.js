@@ -32,19 +32,23 @@ const AnotherLink = styled.div`
         text-decoration: underline;
     }
 `;
-const LoginForm = () => {
+const LoginForm = ({type, form, onChange, onSubmit}) => {
     return(
             <LoginFormBlock>
                 <h3>로그인</h3>
-                <form>
+                <form onSubmit = {onSubmit}>
                     <StyledInput autoComplete = "username"
                         name = "username"
                         placeholder = "아이디"
+                        onChange = {onChange}
+                        value = {form.username}
                     />
                     <StyledInput autoComplete = "new-password"
                         name = "password"
                         placeholder = "비밀번호"
                         type = "password"
+                        onChange = {onChange}
+                        value = {form.password}
                     />
                     <br/>
                     <button>로그인</button>

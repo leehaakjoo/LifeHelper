@@ -48,31 +48,48 @@ const AnotherLink = styled.div`
         text-decoration: underline;
     }
 `;
-const RegisterForm = () => {
+const RegisterForm = ({type, form, onChange, onSubmit}) => {
     return(
         <RegisterFormBlock>
             <h3>회원가입</h3>
             <InnerSpace>
-                <form>
+                <form onSubmit = {onSubmit}>
                     <StyledInput
                         name = "username"
                         placeholder="아이디"
+                        value = {form.username}
+                        onChange = {onChange}
                     />
                     <StyledInput
                         name = "password"
                         placeholder="비밀번호"
+                        value = {form.password}
+                        onChange = {onChange}
+                        
                     />
                     <StyledInput
-                        name = "password-validation"
+                        name = "passwordValidation"
                         placeholder="비밀번호 확인"
+                        value = {form.passwordValidation}
+                        onChange = {onChange}
                     />
                     <StyledInput
                         name = "email"
                         placeholder="이메일 ex) hongildong@naver.com"
+                        value = {form.email}
+                        onChange = {onChange}
                     />
                     <StyledInput
                         name = "school"
                         placeholder="학교"
+                        value = {form.school}
+                        onChange = {onChange}
+                    />
+                    <StyledInput
+                        name = "phoneNumber"
+                        placeholder="휴대전화 번호"
+                        value = {form.phoneNumber}
+                        onChange = {onChange}
                     />
                     <button>회원가입</button>
                 </form>

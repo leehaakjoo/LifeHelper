@@ -1,6 +1,6 @@
 const checkLogin = (ctx, next) => {
     console.log(ctx.state);
-    if(!ctx.state.user){
+    if(!ctx.state.userstatus){
         ctx.status = 401;
         return;
     }

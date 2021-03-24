@@ -1,11 +1,15 @@
 import React from 'react';
 import UserTemplate from '../components/user/UserTemplate';
-import LoginForm from '../components/user/LoginForm';
+import LoginContainer from '../containers/LoginContainer';
+import Header from '../components/Header';
 const LoginPage = () => {
     return(
-        <UserTemplate>
-            <LoginForm/>
-        </UserTemplate>
+        <>
+            <Header/>
+            <UserTemplate>
+                <LoginContainer/>
+            </UserTemplate>
+        </>
         );
 }
 export default LoginPage;

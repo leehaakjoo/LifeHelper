@@ -1,6 +1,7 @@
 import Joi from 'joi';
 import User from '../../models/user';
 export const register = async ctx =>{
+    console.log('레지스터 함수');
     const schema = Joi.object().keys({
         username: Joi.string()
             .alphanum()
@@ -55,20 +56,20 @@ export const login = async ctx =>{
         return;
     }
     try{
-        const user = await User.findByUsername(username); //username에 해당하는 User 데이터 반환
-        if(!user){
+        const userstatus = await User.findByUsername(username); //username에 해당하는 User 데이터 반환
+        if(!userstatus){
             ctx.status = 401;
             return;
         }
-        const valid = await user.checkPassword(password); //비밀번호 체크
+        const valid = await userstatus.checkPassword(password); //비밀번호 체크
         if(!valid){ //비밀번호 오류
             ctx.status = 401;
             return;
         }
-        const data = user.toJSON(); //user를 JSON으로 변환
+        const data = userstatus.toJSON(); //user를 JSON으로 변환
         delete data.hashedPassword; //hashed된 패스워드 데이터 삭제
         ctx.body = data; //ctx body에 데이터 삽입
-        const token = user.generateToken();
+        const token = userstatus.generateToken();
         ctx.cookies.set('access_token', token, {
             maxAge : 1000* 60* 24* 7,
             httpOnly: true,
@@ -79,14 +80,30 @@ export const login = async ctx =>{
     }
 }
 export const check = async ctx =>{
-    const {user} = ctx.state;
-    if(!user){
+    console.log('state', ctx.state);
+    const {userstatus} = ctx.state;
+    
+    if(!userstatus){
         ctx.status = 401;
         return;
     }
-    ctx.body = user;
+    ctx.body = userstatus;
 }
 export const logout = async ctx =>{
     ctx.cookies.set('access_token');
     ctx.status = 204;
+};
+
+export const readInfo  = async ctx => {
+    const {_id} = ctx.params;
+    try{
+        const user = await User.findById(_id).exec();
+        if(!user){
+            ctx.status = 404;
+            return;
+        }
+        ctx.body = user;
+    } catch(e){
+        ctx.throw(500,e);
+    }
 };
