@@ -80,7 +80,6 @@ export const login = async ctx =>{
     }
 }
 export const check = async ctx =>{
-    console.log('state', ctx.state);
     const {userstatus} = ctx.state;
     
     if(!userstatus){
@@ -94,10 +93,13 @@ export const logout = async ctx =>{
     ctx.status = 204;
 };
 
-export const readInfo  = async ctx => {
-    const {_id} = ctx.params;
+export const readinfo  = async ctx => {
+    console.log(ctx.params);
+    const {id} = ctx.params;
+    console.log('리드함수', ctx.params);
     try{
-        const user = await User.findById(_id).exec();
+        const user = await User.findById(id).exec();
+        console.log(user);
         if(!user){
             ctx.status = 404;
             return;

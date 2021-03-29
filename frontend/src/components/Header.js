@@ -61,7 +61,8 @@ const Header = ({userstatus, onLogout}) => {
                         </div>
                         ) : (
                             <div className = "right">
-                                <button to = '/login'>로그인</button>
+                                <Link to = '/login'>로그인</Link>
+                                <button onClick = {onLogout}>로그아웃</button>    
                             </div>
                         )
                     }

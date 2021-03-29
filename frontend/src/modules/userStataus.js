@@ -6,13 +6,15 @@ import createRequestSaga, {createRequestActionTypes} from '../lib/createRequestS
 const TEMP_SET_USER = 'userstatus/TEMP_SET_USER';
 const [CHECK, CHECK_SUCCESS, CHECK_FAILURE] = createRequestActionTypes('userstatus/CHECK');
 const LOGOUT = 'userstatus/LOGOUT';
+const [READ, READ_SUCCESS, READ_FAILURE] = createRequestActionTypes('userstatus/READ');
 
 export const tempSetUser = createAction(TEMP_SET_USER, userstatus => userstatus);
 export const check = createAction(CHECK);
 export const logout = createAction(LOGOUT);
-
+export const read = createAction(READ, id => id);
 
 const checkSaga = createRequestSaga(CHECK, userAPI.check);
+const readInfoSaga = createRequestSaga(READ, userAPI.readinfo);
 
 function checkFailureSaga(){
     try{
@@ -32,15 +34,18 @@ function* logoutSaga(){
 }
 
 
+
 export function* userStatusSaga() {
     yield takeLatest(CHECK, checkSaga);
     yield takeLatest(CHECK_FAILURE, checkFailureSaga);
     yield takeLatest(LOGOUT, logoutSaga);
+    
 }
 
 const initialState = {
     userstatus: null,
     checkError: null,
+    readError: null
 };
 
 export default handleActions(
@@ -63,5 +68,15 @@ export default handleActions(
             ...state,
             userstatus: null,
         }),
+        [READ_SUCCESS]: (state, {payload: userstatus}) => ({
+            ...state,
+            userstatus,
+            readError: null,
+        [READ_FAILURE]: (state, {payload: error}) => ({
+            ...state,
+            readError: error
+        }),
+        
+    })
     }, initialState
 );

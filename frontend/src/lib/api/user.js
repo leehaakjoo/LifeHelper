@@ -1,4 +1,3 @@
-import { CHILD_MESSAGE_INITIALIZE } from '../../../node_modules/jest-worker/build/types';
 import client from './client';
 
 export const register = ({username, password, email, phoneNumber, school}) =>
@@ -9,3 +8,5 @@ export const login = ({username, password}) =>
 export const check = () => client.get('/api/user/check');
 
 export const logout = () => client.post('/api/user/logout');
+
+export const readinfo = id => client.get(`/api/user/${id}`);
